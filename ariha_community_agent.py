@@ -646,6 +646,9 @@ def background_checks(vk_session):
         time.sleep(30)  # спим 30 секунд, чтобы не нагружать процессор
 # ======================== ОСНОВНОЙ ЦИКЛ ========================
 def main():
+        # Запускаем фоновые проверки
+    background_thread = threading.Thread(target=background_checks, args=(vk_session,), daemon=True)
+    background_thread.start()
     vk_session = vk_api.VkApi(token=GROUP_TOKEN)
     vk = vk_session.get_api()
     longpoll = VkBotLongPoll(vk_session, group_id=GROUP_ID)
