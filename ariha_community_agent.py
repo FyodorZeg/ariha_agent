@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 
 import json
@@ -8,7 +7,6 @@ import random
 import csv
 import os
 import requests
-import threading
 import threading
 from datetime import datetime, timedelta, time as dt_time
 from openai import OpenAI
@@ -619,6 +617,7 @@ def send_active_messages(vk_session):
             update_user_memory(uid, {"status": "unavailable"})
             log_event(uid, "unavailable")
             print(f"❌ Сообщение не доставлено. Пользователь {uid} помечен как unavailable.")
+
 # ======================== ФОНОВЫЕ ПРОВЕРКИ ========================
 def background_checks(vk_session):
     last_welcome_check = datetime.now() - timedelta(minutes=10)
@@ -643,12 +642,10 @@ def background_checks(vk_session):
                 print(f"[ERROR] Ошибка проверки дожима: {e}")
             last_followup_check = now
 
-        time.sleep(30)  # спим 30 секунд, чтобы не нагружать процессор
+        time.sleep(30)
+
 # ======================== ОСНОВНОЙ ЦИКЛ ========================
 def main():
-        # Запускаем фоновые проверки
-    background_thread = threading.Thread(target=background_checks, args=(vk_session,), daemon=True)
-    background_thread.start()
     vk_session = vk_api.VkApi(token=GROUP_TOKEN)
     vk = vk_session.get_api()
     longpoll = VkBotLongPoll(vk_session, group_id=GROUP_ID)
@@ -657,31 +654,20 @@ def main():
     if TEST_MODE:
         print("🔔 ВНИМАНИЕ! Тестовый режим: реальные сообщения не отправляются.")
 
+    # Запускаем фоновые проверки
+    background_thread = threading.Thread(target=background_checks, args=(vk_session,), daemon=True)
+    background_thread.start()
+
+    # Запускаем активный режим в фоне
     if AUTO_ACTIVE:
         print("\n=== АКТИВНЫЙ РЕЖИМ (фоновый) ===")
         active_thread = threading.Thread(target=send_active_messages, args=(vk_session,), daemon=True)
         active_thread.start()
-    print("\n=== ПАССИВНЫЙ РЕЖИМ ===")
 
-    last_followup_time = datetime.now() - timedelta(minutes=30)
-    last_welcome_time = datetime.now() - timedelta(minutes=10)
+    print("\n=== ПАССИВНЫЙ РЕЖИМ ===")
 
     while True:
         try:
-            now = datetime.now()
-
-            # Проверяем новых подписчиков каждые 5 минут
-            if now - last_welcome_time >= timedelta(minutes=5):
-                print("\n=== ПРОВЕРКА НОВЫХ ===")
-                check_newbie_welcome(vk_session)
-                last_welcome_time = now
-
-            # Проверяем дожим каждые 20 минут
-            if now - last_followup_time >= timedelta(minutes=20):
-                print("\n=== ПРОВЕРКА ДОЖИМА ===")
-                check_followups(vk_session)
-                last_followup_time = now
-
             for event in longpoll.listen():
                 if event.type == VkBotEventType.MESSAGE_NEW:
                     message = event.obj.message
@@ -724,10 +710,7 @@ def main():
 
                         if is_purchase_intent(text):
                             print(f"🔥 Горячее намерение от {from_id}: {text}")
-                            update_user_memory(from_id, {
-                                "status": "purchase_intent",
-                                "temperature": "burning"
-                            })
+                            update_user_memory(from_id, {"status": "purchase_intent", "temperature": "burning"})
                             log_event(from_id, "purchase_intent")
 
                             client_reply = (
