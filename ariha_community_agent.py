@@ -26,8 +26,8 @@ OPENAI_MODEL = "gpt-4.1"
 MEMORY_LIMIT = 20
 
 # ======================== ТЕСТОВЫЙ РЕЖИМ ========================
-TEST_MODE = False
-AUTO_ACTIVE = False
+TEST_MODE = True
+AUTO_ACTIVE = True
 
 # ======================== ВЛАДЕЛЕЦ ========================
 OWNER_USER_ID = 14394534
