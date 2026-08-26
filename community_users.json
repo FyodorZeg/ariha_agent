@@ -1,0 +1,347 @@
+{
+  "347683526": {
+    "name": "",
+    "stage": "выявление_боли",
+    "history": [],
+    "status": "unavailable",
+    "first_message_sent_at": "2026-08-25T06:52:11.270806",
+    "first_message_id": null,
+    "reminder_sent": true,
+    "reminder_sent_at": "2026-08-25T07:15:55.499773",
+    "last_message_at": null,
+    "last_read_state": null,
+    "purchased": false,
+    "removed_at": "2026-08-25 17:10:27"
+  },
+  "383436194": {
+    "name": "",
+    "stage": "выявление_боли",
+    "history": [],
+    "status": "unavailable",
+    "first_message_sent_at": "2026-08-25T06:52:26.342370",
+    "first_message_id": null,
+    "reminder_sent": true,
+    "reminder_sent_at": "2026-08-25T07:15:55.499773",
+    "last_message_at": null,
+    "last_read_state": null,
+    "purchased": false,
+    "removed_at": "2026-08-25 17:21:54"
+  },
+  "88642021": {
+    "name": "",
+    "stage": "выявление_боли",
+    "history": [],
+    "status": "unavailable",
+    "first_message_sent_at": "2026-08-25T06:52:41.420740",
+    "first_message_id": null,
+    "reminder_sent": true,
+    "reminder_sent_at": "2026-08-25T07:15:55.499773",
+    "last_message_at": null,
+    "last_read_state": null,
+    "purchased": false
+  },
+  "83570068": {
+    "name": "",
+    "stage": "выявление_боли",
+    "history": [],
+    "status": "unavailable",
+    "first_message_sent_at": "2026-08-25T07:45:12.225498",
+    "first_message_id": "7199119",
+    "reminder_sent": true,
+    "reminder_sent_at": "2026-08-25T07:47:18.069038",
+    "last_message_at": null,
+    "last_read_state": null,
+    "purchased": false
+  },
+  "395477611": {
+    "name": "",
+    "stage": "выявление_боли",
+    "history": [],
+    "status": "first_sent",
+    "first_message_sent_at": "2026-08-25T11:35:20.694942",
+    "first_message_id": "48028",
+    "reminder_sent": true,
+    "reminder_sent_at": "2026-08-25T07:47:18.069038",
+    "last_message_at": null,
+    "last_read_state": null,
+    "purchased": false
+  },
+  "77962959": {
+    "name": "",
+    "stage": "выявление_боли",
+    "history": [],
+    "status": "first_sent",
+    "first_message_sent_at": "2026-08-25T11:45:27.764727",
+    "first_message_id": "48029",
+    "reminder_sent": true,
+    "reminder_sent_at": "2026-08-25T07:47:18.069038",
+    "last_message_at": null,
+    "last_read_state": null,
+    "purchased": false
+  },
+  "136789770": {
+    "name": "",
+    "stage": "выявление_боли",
+    "history": [],
+    "status": "unavailable",
+    "first_message_sent_at": "2026-08-25T07:45:42.369796",
+    "first_message_id": "1017439",
+    "reminder_sent": true,
+    "reminder_sent_at": "2026-08-25T07:47:18.069038",
+    "last_message_at": null,
+    "last_read_state": null,
+    "purchased": false
+  },
+  "42031797": {
+    "name": "",
+    "stage": "выявление_боли",
+    "history": [],
+    "status": "unavailable",
+    "first_message_sent_at": "2026-08-25T08:31:19.203501",
+    "first_message_id": "6296461",
+    "reminder_sent": false,
+    "reminder_sent_at": null,
+    "last_message_at": null,
+    "last_read_state": null,
+    "purchased": false
+  },
+  "456338861": {
+    "name": "",
+    "stage": "выявление_боли",
+    "history": [],
+    "status": "first_sent",
+    "first_message_sent_at": "2026-08-25T11:54:50.660587",
+    "first_message_id": "48030",
+    "reminder_sent": false,
+    "reminder_sent_at": null,
+    "last_message_at": null,
+    "last_read_state": null,
+    "purchased": false
+  },
+  "134595099": {
+    "name": "",
+    "stage": "выявление_боли",
+    "history": [],
+    "status": "first_sent",
+    "first_message_sent_at": "2026-08-25T12:04:41.409942",
+    "first_message_id": "48031",
+    "reminder_sent": false,
+    "reminder_sent_at": null,
+    "last_message_at": null,
+    "last_read_state": null,
+    "purchased": false
+  },
+  "200002548548": {
+    "name": "Ариша",
+    "stage": "усиление",
+    "history": [
+      {
+        "role": "user",
+        "content": "вы все тут жулики и обманщики"
+      },
+      {
+        "role": "assistant",
+        "content": "Здравствуйте! Я Ариша, я новый ИИ-администратор Фёдора Александровича.\n\nЧто вас сейчас больше всего беспокоит: живот, отёки, усталость?"
+      },
+      {
+        "role": "user",
+        "content": "вы чне тут пруггу гоните"
+      },
+      {
+        "role": "assistant",
+        "content": "Понимаю, что у вас есть сомнения — сейчас в интернете много всего, и доверять сложно. Я здесь, чтобы помочь разобраться именно с вопросами по дыханию и лёгкости. \n\nЧто вас больше всего беспокоит: живот, отёки или усталость?"
+      },
+      {
+        "role": "user",
+        "content": "нет я несогласен"
+      },
+      {
+        "role": "assistant",
+        "content": "Спасибо, что написали! Если вдруг захотите поговорить о дыхании, здоровье или похудении — я всегда на связи. Если что, я не обижаюсь – я же робот-помощник 🙂"
+      },
+      {
+        "role": "user",
+        "content": "Хочу по общаться с фёдором"
+      },
+      {
+        "role": "assistant",
+        "content": "Я вас понимаю, иногда хочется живого общения! Фёдор Александрович лично ведёт занятия и отвечает на вопросы в прямом эфире на онлайн-уроках. А я могу помочь вам с записью или передать ваш вопрос. \n\nЧто бы вы хотели узнать у Фёдора Александровича?"
+      },
+      {
+        "role": "user",
+        "content": "Не хочу онлайн курс хочу  курс в записях"
+      },
+      {
+        "role": "assistant",
+        "content": "Поняла вас, многим удобнее заниматься в своём ритме! У нас есть обучающий курс в записях: 7 видеоуроков, доступ навсегда, цена — 3000 ₽. \n\nКак вам такая цена? Если что, я машина и не обижаюсь на честные ответы 🙂"
+      },
+      {
+        "role": "user",
+        "content": "хочу обучающий курс"
+      },
+      {
+        "role": "assistant",
+        "content": "Отлично! Вот ссылка на оплату обучающего курса: https://fyodorzheganin.getcourse.ru/page4707585\n\nПожалуйста, дайте знать, когда оплатите, чтобы я могла всё проверить и выслать вам доступ."
+      },
+      {
+        "role": "user",
+        "content": "хочу основной курс в записяз"
+      },
+      {
+        "role": "assistant",
+        "content": "Основной курс проходит только в формате живых онлайн-занятий, чтобы Фёдор Александрович мог поддерживать участников лично. Но если вам нужны именно записи, обучающий курс — это оптимальный вариант, он полностью в записи и доступ навсегда.\n\nМогу уточнить у Фёдора Александровича, будут ли записи основного курса в будущем. Хотите, чтобы я спросила?"
+      },
+      {
+        "role": "user",
+        "content": "здраствуйте"
+      },
+      {
+        "role": "assistant",
+        "content": "Здравствуйте! Я Ариша, я новый ИИ-администратор Фёдора Александровича.\n\nЧто вас сейчас больше всего беспокоит: живот, отёки, усталость?"
+      },
+      {
+        "role": "user",
+        "content": "меня беспокоит живот"
+      },
+      {
+        "role": "assistant",
+        "content": "Я вас очень понимаю, живот часто не уходит, как будто тело держится за него. Давайте разберёмся вместе, чтобы я могла точнее понять картину, напишите, пожалуйста, ваш рост и вес."
+      },
+      {
+        "role": "user",
+        "content": "182 см 98 кг"
+      },
+      {
+        "role": "assistant",
+        "content": "Спасибо! Считаю по формуле ВОЗ:\n\n📊 Ваш рост: 1,82 м  \n📊 Ваш вес: 98 кг  \n🧮 ИМТ = 98 / (1,82 × 1,82) = 29,6  \n🧮 Норма веса: от 61 кг до 82 кг  \n🧮 Переизбыток: 98 – 82 = 16 кг\n\nПереизбыток веса влияет на обмен веществ — клеткам не хватает кислорода, и они будто засыпают, поэтому живот уходит очень медленно.  \nЕсли худеть только на диете с дефицитом 150 ккал/день, это займёт примерно:  \n🧮 16 × 1000 × 7,5 / 150 = 800 дней (около 26 месяцев!)\n\nЭто не ваша вина, так работает физиология. Понимаю, как это тяжело.  \nА вы уже как-то боролись с этим весом? Расскажите, что пробовали."
+      },
+      {
+        "role": "user",
+        "content": "ye jxtym ljkuj [eltnm yf lbtnt"
+      },
+      {
+        "role": "assistant",
+        "content": "Похоже, что в сообщении опечатка — не совсем поняла, что вы хотели написать. Можете повторить или уточнить, пожалуйста? Я здесь, чтобы помочь вам разобраться с вопросами по животу и весу. \n\nЧто именно вы пробовали раньше для снижения веса?"
+      }
+    ],
+    "status": "in_dialog",
+    "first_message_sent_at": null,
+    "first_message_id": null,
+    "reminder_sent": false,
+    "reminder_sent_at": null,
+    "last_message_at": "2026-08-25T20:39:06.275800",
+    "last_read_state": null,
+    "purchased": false
+  },
+  "174198128": {
+    "name": "",
+    "stage": "выявление_боли",
+    "history": [],
+    "status": "first_sent",
+    "first_message_sent_at": "2026-08-25T12:29:51.721356",
+    "first_message_id": "48032",
+    "reminder_sent": false,
+    "reminder_sent_at": null,
+    "last_message_at": null,
+    "last_read_state": null,
+    "purchased": false
+  },
+  "251264267": {
+    "name": "",
+    "stage": "выявление_боли",
+    "history": [],
+    "status": "first_sent",
+    "first_message_sent_at": "2026-08-25T13:18:32.613621",
+    "first_message_id": "48033",
+    "reminder_sent": false,
+    "reminder_sent_at": null,
+    "last_message_at": null,
+    "last_read_state": null,
+    "purchased": false
+  },
+  "218867666": {
+    "name": "",
+    "stage": "выявление_боли",
+    "history": [],
+    "status": "first_sent",
+    "first_message_sent_at": "2026-08-25T13:28:54.230022",
+    "first_message_id": "48034",
+    "reminder_sent": false,
+    "reminder_sent_at": null,
+    "last_message_at": null,
+    "last_read_state": null,
+    "purchased": false
+  },
+  "36643139": {
+    "name": "",
+    "stage": "выявление_боли",
+    "history": [],
+    "status": "first_sent",
+    "first_message_sent_at": "2026-08-25T13:39:25.767794",
+    "first_message_id": "48035",
+    "reminder_sent": false,
+    "reminder_sent_at": null,
+    "last_message_at": null,
+    "last_read_state": null,
+    "purchased": false
+  },
+  "10939807": {
+    "name": "",
+    "stage": "выявление_боли",
+    "history": [],
+    "status": "first_sent",
+    "first_message_sent_at": "2026-08-25T17:37:47.246715",
+    "first_message_id": "48036",
+    "reminder_sent": false,
+    "reminder_sent_at": null,
+    "last_message_at": null,
+    "last_read_state": null,
+    "purchased": false
+  },
+  "136045255": {
+    "name": "Светлана",
+    "stage": "выявление_боли",
+    "history": [
+      {
+        "role": "user",
+        "content": "Идём дальше к уроку."
+      },
+      {
+        "role": "assistant",
+        "content": "Здравствуйте! Я Ариша, я новый ИИ-администратор Фёдора Александровича.\n\nЧто вас сейчас больше всего беспокоит: живот, отёки, усталость?"
+      },
+      {
+        "role": "user",
+        "content": "ПОЛУЧИТЬ 1 урок!"
+      },
+      {
+        "role": "assistant",
+        "content": "Здравствуйте! Я Ариша, я новый ИИ-администратор Фёдора Александровича.\n\nУ нас нет бесплатных уроков, но есть пробный урок по ссылке. А чтобы подобрать для вас подходящую программу, расскажите, пожалуйста: что вас сейчас больше всего беспокоит — живот, отёки или усталость?"
+      },
+      {
+        "role": "user",
+        "content": "ПОЛУЧИТЬ  2 урок!"
+      },
+      {
+        "role": "assistant",
+        "content": "Здравствуйте! Я Ариша, я новый ИИ-администратор Фёдора Александровича.\n\nУ нас нет бесплатных уроков, но я могу подобрать для вас подходящий курс или пробный урок. Подскажите, пожалуйста, что вас сейчас больше всего беспокоит: живот, отёки или усталость? Так я смогу лучше помочь."
+      },
+      {
+        "role": "user",
+        "content": "Меню"
+      },
+      {
+        "role": "assistant",
+        "content": "Я вас понимаю, иногда хочется всё разложить по полочкам 🙂 У нас нет специального меню, но я могу рассказать о программах, которые помогут с животом, отёками и усталостью. Что из этого для вас сейчас актуальнее всего?"
+      }
+    ],
+    "status": "in_dialog",
+    "first_message_sent_at": null,
+    "first_message_id": null,
+    "reminder_sent": false,
+    "reminder_sent_at": null,
+    "last_message_at": "2026-08-26T04:57:53.730226",
+    "last_read_state": null,
+    "purchased": false
+  }
+}
