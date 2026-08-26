@@ -45,6 +45,12 @@ LINKS = {
     "link_free_lesson": "https://vkvideo.ru/video-24794761_456239406"
 }
 
+# ======================== БЛОКИРОВКИ ДЛЯ ФАЙЛОВ ========================
+users_lock = threading.Lock()
+chat_lock = threading.Lock()
+sent_lock = threading.Lock()
+analytics_lock = threading.Lock()
+
 # ======================== ЧТЕНИЕ ПРОМТА ========================
 def load_system_prompt():
     prompt_path = os.path.join(SCRIPT_DIR, "ariha_prompt.txt")
@@ -64,15 +70,20 @@ BASE_SYSTEM_PROMPT = load_system_prompt()
 USERS_MEMORY_FILE = os.path.join(SCRIPT_DIR, 'community_users.json')
 
 def load_users_memory():
-    try:
-        with open(USERS_MEMORY_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return {}
+    with users_lock:
+        try:
+            with open(USERS_MEMORY_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            return {}
 
 def save_users_memory(data):
-    with open(USERS_MEMORY_FILE, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+    if TEST_MODE:
+        print("Тестовый режим: пропускаю сохранение пользователей.")
+        return
+    with users_lock:
+        with open(USERS_MEMORY_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
 
 def get_user_memory(user_id):
     users = load_users_memory()
@@ -136,17 +147,22 @@ def get_ai_answer(user_id, user_message):
     name = user_data.get('name', '')
     history = user_data.get('history', [])[-MEMORY_LIMIT:]
 
-    system_prompt = BASE_SYSTEM_PROMPT.format(
-        stage=current_stage,
-        name=name if name else 'Неизвестно',
-        link_video_age=LINKS["link_video_age"],
-        link_video_first=LINKS["link_video_first"],
-        link_video_wow=LINKS["link_video_wow"],
-        link_course_main=LINKS["link_course_main"],
-        link_course_basic=LINKS["link_course_basic"],
-        link_chat=LINKS["link_chat"],
-        link_free_lesson=LINKS["link_free_lesson"]
-    )
+    # ИСПРАВЛЕНО: защита от ошибок форматирования промта
+    try:
+        system_prompt = BASE_SYSTEM_PROMPT.format(
+            stage=current_stage,
+            name=name if name else 'Неизвестно',
+            link_video_age=LINKS["link_video_age"],
+            link_video_first=LINKS["link_video_first"],
+            link_video_wow=LINKS["link_video_wow"],
+            link_course_main=LINKS["link_course_main"],
+            link_course_basic=LINKS["link_course_basic"],
+            link_chat=LINKS["link_chat"],
+            link_free_lesson=LINKS["link_free_lesson"]
+        )
+    except KeyError as e:
+        print(f"⚠️ Ошибка форматирования промта: {e}. Использую промт без подстановок.")
+        system_prompt = BASE_SYSTEM_PROMPT
 
     messages = [{"role": "system", "content": system_prompt}]
     for h in history:
@@ -220,15 +236,20 @@ def send_vk_message(vk_session, user_id=None, peer_id=None, message=""):
 CHAT_STATE_FILE = os.path.join(SCRIPT_DIR, 'chat_state.json')
 
 def load_chat_state():
-    try:
-        with open(CHAT_STATE_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except:
-        return {"last_message_time": None, "last_direct_time": None, "messages_sent_today": 0, "date": str(datetime.now().date()), "last_welcome_time": None}
+    with chat_lock:
+        try:
+            with open(CHAT_STATE_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except:
+            return {"last_message_time": None, "last_direct_time": None, "messages_sent_today": 0, "date": str(datetime.now().date()), "last_welcome_time": None}
 
 def save_chat_state(state):
-    with open(CHAT_STATE_FILE, 'w', encoding='utf-8') as f:
-        json.dump(state, f, ensure_ascii=False, indent=2)
+    if TEST_MODE:
+        print("Тестовый режим: пропускаю сохранение состояния чата.")
+        return
+    with chat_lock:
+        with open(CHAT_STATE_FILE, 'w', encoding='utf-8') as f:
+            json.dump(state, f, ensure_ascii=False, indent=2)
 
 def is_direct_mention(text):
     return text.strip().lower().startswith("ариша")
@@ -326,9 +347,13 @@ def send_chat_welcome(vk_session, peer_id):
 ANALYTICS_FILE = os.path.join(SCRIPT_DIR, 'community_analytics.csv')
 
 def log_event(user_id, event):
-    with open(ANALYTICS_FILE, 'a', newline='', encoding='utf-8') as f:
-        writer = csv.writer(f)
-        writer.writerow([datetime.now().isoformat(), user_id, event])
+    if TEST_MODE:
+        print(f"Тестовый режим: событие {event} не записывается.")
+        return
+    with analytics_lock:
+        with open(ANALYTICS_FILE, 'a', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow([datetime.now().isoformat(), user_id, event])
     print(f"📊 Событие: {event} для пользователя {user_id}")
 
 # ======================== ОПРЕДЕЛЕНИЕ НЕГАТИВА ========================
@@ -471,18 +496,15 @@ def check_first_message_followups(vk_session):
     if changed:
         save_users_memory(users)
 
+# ИСПРАВЛЕНО: проверка прочтения через getById
 def is_message_read(vk_session, user_id, message_id):
     try:
         vk = vk_session.get_api()
-        history = vk.messages.getHistory(
-            user_id=user_id,
-            offset=0,
-            count=5
-        )
-        for msg in history.get('items', []):
-            if msg.get('id') == int(message_id):
-                return msg.get('read_state') == 1
-        return False
+        response = vk.messages.getById(message_ids=str(message_id))
+        items = response.get('items', [])
+        if not items:
+            return False
+        return items[0].get('read_state') == 1
     except Exception as e:
         print(f"[ERROR] Ошибка проверки прочтения для {user_id}: {e}")
         return False
@@ -596,15 +618,20 @@ ACTIVE_QUEUE_FILE = os.path.join(SCRIPT_DIR, 'warm_dialogs.csv')
 SENT_ANCIENT_FILE = os.path.join(SCRIPT_DIR, 'sent_ancient.json')
 
 def load_sent_ancient():
-    try:
-        with open(SENT_ANCIENT_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except:
-        return []
+    with sent_lock:
+        try:
+            with open(SENT_ANCIENT_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except:
+            return []
 
 def save_sent_ancient(data):
-    with open(SENT_ANCIENT_FILE, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+    if TEST_MODE:
+        print("Тестовый режим: пропускаю сохранение sent_ancient.")
+        return
+    with sent_lock:
+        with open(SENT_ANCIENT_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
 
 def get_active_queue():
     sent = set(load_sent_ancient())
@@ -684,9 +711,21 @@ def background_checks(vk_session):
     last_welcome_check = datetime.now() - timedelta(minutes=10)
     last_followup_check = datetime.now() - timedelta(minutes=30)
     last_summary_check = datetime.now() - timedelta(hours=6)
+    # ИСПРАВЛЕНО: переменные для управления активной рассылкой
+    global last_active_send_time, active_sending_in_progress
+    last_active_send_time = None
+    active_sending_in_progress = False
 
     while True:
         now = datetime.now()
+
+        # Активная рассылка по расписанию (раз в сутки в рабочее время)
+        if AUTO_ACTIVE and is_active_time() and not active_sending_in_progress \
+                and (last_active_send_time is None or now - last_active_send_time > timedelta(hours=24)):
+            active_sending_in_progress = True
+            last_active_send_time = now
+            print("\n🚀 Запуск активной рассылки (по расписанию)...")
+            threading.Thread(target=active_sending_wrapper, args=(vk_session,), daemon=True).start()
 
         if now - last_welcome_check >= timedelta(minutes=5):
             try:
@@ -713,6 +752,16 @@ def background_checks(vk_session):
 
         time.sleep(30)
 
+# Обёртка для активной рассылки, чтобы сбрасывать флаг после завершения
+def active_sending_wrapper(vk_session):
+    global active_sending_in_progress
+    try:
+        send_active_messages(vk_session)
+    except Exception as e:
+        print(f"❌ Ошибка в активной рассылке: {e}")
+    finally:
+        active_sending_in_progress = False
+
 # ======================== ОСНОВНОЙ ЦИКЛ ========================
 def main():
     vk_session = vk_api.VkApi(token=GROUP_TOKEN)
@@ -729,11 +778,7 @@ def main():
     background_thread = threading.Thread(target=background_checks, args=(vk_session,), daemon=True)
     background_thread.start()
 
-    # Запускаем активный режим в фоне
-    if AUTO_ACTIVE:
-        print("\n=== АКТИВНЫЙ РЕЖИМ (фоновый) ===")
-        active_thread = threading.Thread(target=send_active_messages, args=(vk_session,), daemon=True)
-        active_thread.start()
+    # Активный режим теперь запускается из background_checks, отдельный поток не нужен
 
     print("\n=== ПАССИВНЫЙ РЕЖИМ ===")
 
@@ -765,8 +810,9 @@ def main():
                     if peer_id == from_id:
                         log_event(from_id, "message_received")
                         user_data = get_user_memory(from_id)
-                        update_user_memory(from_id, {"last_activity_at": datetime.now().isoformat()}) 
-                                                # Если отправлен пробный урок и пользователь ответил — останавливаем дожимы
+                        update_user_memory(from_id, {"last_activity_at": datetime.now().isoformat()})
+
+                        # ИСПРАВЛЕНО: если пользователь ответил после пробного урока, останавливаем дожимы
                         if user_data.get('probe_lesson_sent') and not user_data.get('probe_lesson_responded'):
                             update_user_memory(from_id, {"probe_lesson_responded": True})
                             log_event(from_id, "probe_lesson_responded")
@@ -834,6 +880,8 @@ def main():
                         if not user_data.get('history'):
                             ai_response = "Здравствуйте! Я Ариша, я новый ИИ-администратор Фёдора Александровича.\n\nЧто вас сейчас больше всего беспокоит: живот, отёки, усталость?"
                             new_stage = "выявление_боли"
+                            # ИСПРАВЛЕНО: помечаем, что приветствие отправлено, чтобы фоновый check_newbie_welcome не слал ещё раз
+                            update_user_memory(from_id, {"welcome_sent": True, "welcome_sent_at": datetime.now().isoformat()})
                         else:
                             ai_response, new_stage = get_ai_answer(from_id, text)
 
