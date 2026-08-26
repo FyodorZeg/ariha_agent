@@ -633,7 +633,6 @@ def main():
         print("\n=== АКТИВНЫЙ РЕЖИМ (фоновый) ===")
         active_thread = threading.Thread(target=send_active_messages, args=(vk_session,), daemon=True)
         active_thread.start()
-
     print("\n=== ПАССИВНЫЙ РЕЖИМ ===")
 
     last_followup_time = datetime.now() - timedelta(minutes=30)
