@@ -9,6 +9,7 @@ import csv
 import os
 import requests
 import threading
+import threading
 from datetime import datetime, timedelta, time as dt_time
 from openai import OpenAI
 import vk_api
