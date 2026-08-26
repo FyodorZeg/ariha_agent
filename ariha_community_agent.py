@@ -19,7 +19,7 @@ GROUP_TOKEN = "vk1.a.TQn_giOgaA_2rtgVAuKUbGRrBkppSGca0cx-wn9A0W-lND5nz-e3C3uq69l
 GROUP_ID = 24794761
 
 OPENAI_API_BASE = "https://api.proxyapi.ru/openai/v1"
-OPENAI_API_KEY = "sk-gaUG0ZAILgyw13eQyBn42WXXrbZK5hVB"
+OPENAI_API_KEY = "sk-SxCSVAeWBwdT7E3Ad9bCNeklZYtAbV1S"
 OPENAI_MODEL = "gpt-4.1"
 
 MEMORY_LIMIT = 20
