@@ -31,6 +31,7 @@ AUTO_ACTIVE = True
 
 # ======================== ВЛАДЕЛЕЦ ========================
 OWNER_USER_ID = 14394534
+REPORT_SECRET_WORD = "отчёт1967"
 
 # ======================== ССЫЛКИ ========================
 LINKS = {
@@ -530,6 +531,68 @@ def check_followups(vk_session):
     check_first_message_followups(vk_session)
     check_probe_followups(vk_session)
 
+# ======================== СВОДКА ========================
+def generate_summary_text():
+    users = load_users_memory()
+    if not users:
+        return "📊 СВОДКА: нет данных о пользователях."
+
+    status_ru = {
+        'new': 'Новые',
+        'first_sent': 'Отправлено первое сообщение',
+        'reminder_sent': 'Отправлено напоминание',
+        'in_dialog': 'В диалоге',
+        'purchase_intent': 'Хочет купить/общаться',
+        'unavailable': 'Недоступен',
+        'negative': 'Отказ или негатив',
+        'purchased': 'Купил',
+        'removed': 'Удалён',
+        'do_not_disturb': 'Просил не беспокоить',
+        'closed': 'Закрыт'
+    }
+
+    counts = {}
+    for uid, data in users.items():
+        status = data.get('status', 'new')
+        counts[status] = counts.get(status, 0) + 1
+
+    lines = []
+    lines.append("📊 ОТЧЁТ ПО АГЕНТУ АРИША")
+    lines.append(f"Дата: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    lines.append(f"Всего пользователей: {len(users)}")
+    lines.append("")
+    lines.append("По статусам:")
+    for status, ru_name in status_ru.items():
+        if status in counts:
+            lines.append(f"  {ru_name}: {counts[status]}")
+
+    lines.append("")
+    lines.append("🔥 Хотят купить:")
+    found_buy = False
+    for uid, data in users.items():
+        if data.get('status') == 'purchase_intent':
+            name = data.get('name') or f"ID {uid}"
+            lines.append(f"  - {name} (ID: {uid}) — https://vk.com/id{uid}")
+            found_buy = True
+    if not found_buy:
+        lines.append("  Нет")
+
+    lines.append("")
+    lines.append("💬 В диалоге:")
+    found_dialog = False
+    for uid, data in users.items():
+        if data.get('status') == 'in_dialog':
+            name = data.get('name') or f"ID {uid}"
+            lines.append(f"  - {name} (ID: {uid}) — https://vk.com/id{uid}")
+            found_dialog = True
+    if not found_dialog:
+        lines.append("  Нет")
+
+    return "\n".join(lines)
+
+def print_summary():
+    print(generate_summary_text())
+
 # ======================== АКТИВНЫЙ РЕЖИМ ========================
 ACTIVE_QUEUE_FILE = os.path.join(SCRIPT_DIR, 'warm_dialogs.csv')
 SENT_ANCIENT_FILE = os.path.join(SCRIPT_DIR, 'sent_ancient.json')
@@ -622,6 +685,7 @@ def send_active_messages(vk_session):
 def background_checks(vk_session):
     last_welcome_check = datetime.now() - timedelta(minutes=10)
     last_followup_check = datetime.now() - timedelta(minutes=30)
+    last_summary_check = datetime.now() - timedelta(hours=6)
 
     while True:
         now = datetime.now()
@@ -642,6 +706,13 @@ def background_checks(vk_session):
                 print(f"[ERROR] Ошибка проверки дожима: {e}")
             last_followup_check = now
 
+        if now - last_summary_check >= timedelta(hours=6):
+            try:
+                print_summary()
+            except Exception as e:
+                print(f"[ERROR] Ошибка вывода сводки: {e}")
+            last_summary_check = now
+
         time.sleep(30)
 
 # ======================== ОСНОВНОЙ ЦИКЛ ========================
@@ -653,6 +724,8 @@ def main():
     print("🚀 Агент сообщества запущен (личные + чат + активный режим + дожим).")
     if TEST_MODE:
         print("🔔 ВНИМАНИЕ! Тестовый режим: реальные сообщения не отправляются.")
+
+    print_summary()
 
     # Запускаем фоновые проверки
     background_thread = threading.Thread(target=background_checks, args=(vk_session,), daemon=True)
@@ -695,6 +768,13 @@ def main():
                         log_event(from_id, "message_received")
                         user_data = get_user_memory(from_id)
                         update_user_memory(from_id, {"last_activity_at": datetime.now().isoformat()})
+
+                        # Команда отчёта
+                        if text.lower() == REPORT_SECRET_WORD:
+                            summary = generate_summary_text()
+                            send_vk_message(vk_session, user_id=from_id, message=summary)
+                            log_event(from_id, "report_requested")
+                            continue
 
                         if user_data.get('status') in ('negative', 'do_not_disturb'):
                             print(f"🚫 Пользователь {from_id} в стоп-листе. Не отвечаю.")
