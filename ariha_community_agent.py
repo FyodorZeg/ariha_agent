@@ -619,7 +619,31 @@ def send_active_messages(vk_session):
             update_user_memory(uid, {"status": "unavailable"})
             log_event(uid, "unavailable")
             print(f"❌ Сообщение не доставлено. Пользователь {uid} помечен как unavailable.")
+# ======================== ФОНОВЫЕ ПРОВЕРКИ ========================
+def background_checks(vk_session):
+    last_welcome_check = datetime.now() - timedelta(minutes=10)
+    last_followup_check = datetime.now() - timedelta(minutes=30)
 
+    while True:
+        now = datetime.now()
+
+        if now - last_welcome_check >= timedelta(minutes=5):
+            try:
+                print("\n=== ПРОВЕРКА НОВЫХ (фон) ===")
+                check_newbie_welcome(vk_session)
+            except Exception as e:
+                print(f"[ERROR] Ошибка проверки новых: {e}")
+            last_welcome_check = now
+
+        if now - last_followup_check >= timedelta(minutes=20):
+            try:
+                print("\n=== ПРОВЕРКА ДОЖИМА (фон) ===")
+                check_followups(vk_session)
+            except Exception as e:
+                print(f"[ERROR] Ошибка проверки дожима: {e}")
+            last_followup_check = now
+
+        time.sleep(30)  # спим 30 секунд, чтобы не нагружать процессор
 # ======================== ОСНОВНОЙ ЦИКЛ ========================
 def main():
     vk_session = vk_api.VkApi(token=GROUP_TOKEN)
