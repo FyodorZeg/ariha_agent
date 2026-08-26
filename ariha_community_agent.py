@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 
 import json
@@ -7,6 +8,7 @@ import random
 import csv
 import os
 import requests
+import threading
 from datetime import datetime, timedelta, time as dt_time
 from openai import OpenAI
 import vk_api
@@ -81,13 +83,21 @@ def get_user_memory(user_id):
             "stage": "выявление_боли",
             "history": [],
             "status": "new",
+            "temperature": "cold",
+            "source": "direct",
             "first_message_sent_at": None,
             "first_message_id": None,
+            "last_activity_at": None,
             "reminder_sent": False,
             "reminder_sent_at": None,
             "last_message_at": None,
             "last_read_state": None,
             "purchased": False,
+            "welcome_sent": False,
+            "welcome_sent_at": None,
+            "pain_done": False,
+            "pain_done_at": None,
+            "gave_weight_height": False,
             "probe_lesson_sent": False,
             "probe_lesson_sent_at": None,
             "probe_lesson_responded": False,
@@ -381,6 +391,44 @@ def generate_active_first_message():
             "Хотите узнать подробнее?"
         )
 
+# ======================== НОВЫЕ ПОДПИСЧИКИ (ПРИВЕТСТВИЕ) ========================
+def check_newbie_welcome(vk_session):
+    users = load_users_memory()
+    now = datetime.now()
+    changed = False
+
+    for uid, data in users.items():
+        if data.get('welcome_sent'):
+            continue
+        if data.get('status') not in ('new', 'in_dialog'):
+            continue
+
+        last_activity = data.get('last_activity_at')
+        if not last_activity:
+            continue
+
+        last_activity_dt = datetime.fromisoformat(last_activity)
+        diff = now - last_activity_dt
+
+        if diff >= timedelta(minutes=12):
+            message = (
+                "Здравствуйте! Я Ариша, помощница Фёдора Александровича. "
+                "Если у вас есть вопросы, пишите сюда — с удовольствием помогу. "
+                "Если я не смогу ответить, передам ваш вопрос Фёдору Александровичу, и он с вами свяжется."
+            )
+            send_vk_message(vk_session, user_id=int(uid), message=message)
+            update_user_memory(uid, {
+                "welcome_sent": True,
+                "welcome_sent_at": now.isoformat(),
+                "temperature": "warm"
+            })
+            log_event(uid, "welcome_sent")
+            print(f"👋 Приветствие отправлено пользователю {uid}")
+            changed = True
+
+    if changed:
+        save_users_memory(users)
+
 # ======================== ДОЖИМ ========================
 def check_first_message_followups(vk_session):
     users = load_users_memory()
@@ -544,7 +592,7 @@ def send_active_messages(vk_session):
         print("✅ Активная очередь пуста. Все старые контакты обработаны.")
         return
 
-    limit = 10
+    limit = 20
     to_send = queue[:limit]
 
     sent = load_sent_ancient()
@@ -563,7 +611,7 @@ def send_active_messages(vk_session):
                 "first_message_id": str(message_id)
             })
             log_event(uid, "first_message_sent")
-            pause = random.randint(9*60, 11*60)
+            pause = random.randint(28*60, 32*60)
             print(f"⏳ Пауза {pause} секунд...")
             time.sleep(pause)
         else:
@@ -580,20 +628,28 @@ def main():
     print("🚀 Агент сообщества запущен (личные + чат + активный режим + дожим).")
     if TEST_MODE:
         print("🔔 ВНИМАНИЕ! Тестовый режим: реальные сообщения не отправляются.")
-if AUTO_ACTIVE:
+
+    if AUTO_ACTIVE:
         print("\n=== АКТИВНЫЙ РЕЖИМ (фоновый) ===")
         active_thread = threading.Thread(target=send_active_messages, args=(vk_session,), daemon=True)
         active_thread.start()
-    
 
     print("\n=== ПАССИВНЫЙ РЕЖИМ ===")
 
-    last_followup_time = datetime.now() - timedelta(minutes=30)  # чтобы первая проверка прошла сразу
+    last_followup_time = datetime.now() - timedelta(minutes=30)
+    last_welcome_time = datetime.now() - timedelta(minutes=10)
 
     while True:
         try:
-            # Проверяем дожим каждые 20 минут
             now = datetime.now()
+
+            # Проверяем новых подписчиков каждые 5 минут
+            if now - last_welcome_time >= timedelta(minutes=5):
+                print("\n=== ПРОВЕРКА НОВЫХ ===")
+                check_newbie_welcome(vk_session)
+                last_welcome_time = now
+
+            # Проверяем дожим каждые 20 минут
             if now - last_followup_time >= timedelta(minutes=20):
                 print("\n=== ПРОВЕРКА ДОЖИМА ===")
                 check_followups(vk_session)
@@ -625,6 +681,7 @@ if AUTO_ACTIVE:
                     if peer_id == from_id:
                         log_event(from_id, "message_received")
                         user_data = get_user_memory(from_id)
+                        update_user_memory(from_id, {"last_activity_at": datetime.now().isoformat()})
 
                         if user_data.get('status') in ('negative', 'do_not_disturb'):
                             print(f"🚫 Пользователь {from_id} в стоп-листе. Не отвечаю.")
@@ -632,7 +689,7 @@ if AUTO_ACTIVE:
 
                         if is_negative_reply(text):
                             print(f"⚠️ Пользователь {from_id} прислал негатив/отказ: {text}")
-                            update_user_memory(from_id, {"status": "negative"})
+                            update_user_memory(from_id, {"status": "negative", "temperature": "cold"})
                             log_event(from_id, "negative")
                             apology = "Понимаю, извините, если побеспокоила. Я больше не буду вам писать. Хорошего дня!"
                             send_vk_message(vk_session, user_id=from_id, message=apology)
@@ -640,7 +697,10 @@ if AUTO_ACTIVE:
 
                         if is_purchase_intent(text):
                             print(f"🔥 Горячее намерение от {from_id}: {text}")
-                            update_user_memory(from_id, {"status": "purchase_intent"})
+                            update_user_memory(from_id, {
+                                "status": "purchase_intent",
+                                "temperature": "burning"
+                            })
                             log_event(from_id, "purchase_intent")
 
                             client_reply = (
@@ -690,7 +750,12 @@ if AUTO_ACTIVE:
                         if len(history) > MEMORY_LIMIT * 2:
                             history = history[-MEMORY_LIMIT * 2:]
 
-                        update_data = {"history": history, "last_message_at": datetime.now().isoformat(), "status": "in_dialog"}
+                        update_data = {
+                            "history": history,
+                            "last_message_at": datetime.now().isoformat(),
+                            "status": "in_dialog",
+                            "temperature": "warm"
+                        }
                         if new_stage:
                             update_data["stage"] = new_stage
                         update_user_memory(from_id, update_data)
@@ -698,7 +763,6 @@ if AUTO_ACTIVE:
                         send_vk_message(vk_session, user_id=from_id, message=ai_response)
                         log_event(from_id, "ai_reply_sent")
 
-                        # Если в ответе есть ссылка на бесплатный урок, помечаем
                         if LINKS["link_free_lesson"] in ai_response:
                             update_user_memory(from_id, {
                                 "probe_lesson_sent": True,
