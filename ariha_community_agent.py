@@ -26,7 +26,7 @@ MEMORY_LIMIT = 20
 
 # ======================== ТЕСТОВЫЙ РЕЖИМ ========================
 TEST_MODE = False
-AUTO_ACTIVE = False
+AUTO_ACTIVE = True
 
 # ======================== ВЛАДЕЛЕЦ ========================
 OWNER_USER_ID = 14394534
@@ -580,10 +580,11 @@ def main():
     print("🚀 Агент сообщества запущен (личные + чат + активный режим + дожим).")
     if TEST_MODE:
         print("🔔 ВНИМАНИЕ! Тестовый режим: реальные сообщения не отправляются.")
-
-    if AUTO_ACTIVE:
-        print("\n=== АКТИВНЫЙ РЕЖИМ ===")
-        send_active_messages(vk_session)
+if AUTO_ACTIVE:
+        print("\n=== АКТИВНЫЙ РЕЖИМ (фоновый) ===")
+        active_thread = threading.Thread(target=send_active_messages, args=(vk_session,), daemon=True)
+        active_thread.start()
+    
 
     print("\n=== ПАССИВНЫЙ РЕЖИМ ===")
 
