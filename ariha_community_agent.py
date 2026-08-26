@@ -765,7 +765,12 @@ def main():
                     if peer_id == from_id:
                         log_event(from_id, "message_received")
                         user_data = get_user_memory(from_id)
-                        update_user_memory(from_id, {"last_activity_at": datetime.now().isoformat()})
+                        update_user_memory(from_id, {"last_activity_at": datetime.now().isoformat()}) 
+                                                # Если отправлен пробный урок и пользователь ответил — останавливаем дожимы
+                        if user_data.get('probe_lesson_sent') and not user_data.get('probe_lesson_responded'):
+                            update_user_memory(from_id, {"probe_lesson_responded": True})
+                            log_event(from_id, "probe_lesson_responded")
+                            print(f"✅ Пользователь {from_id} ответил после пробного урока. Дожимы остановлены.")
 
                         # Команда отчёта
                         if text.lower() == REPORT_SECRET_WORD:
