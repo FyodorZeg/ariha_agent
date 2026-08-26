@@ -416,15 +416,13 @@ def check_newbie_welcome(vk_session):
                 "Если у вас есть вопросы, пишите сюда — с удовольствием помогу. "
                 "Если я не смогу ответить, передам ваш вопрос Фёдору Александровичу, и он с вами свяжется."
             )
-            send_vk_message(vk_session, user_id=int(uid), message=message)
-            update_user_memory(uid, {
-                "welcome_sent": True,
-                "welcome_sent_at": now.isoformat(),
-                "temperature": "warm"
-            })
-            log_event(uid, "welcome_sent")
-            print(f"👋 Приветствие отправлено пользователю {uid}")
-            changed = True
+            if send_vk_message(vk_session, user_id=int(uid), message=message):
+                users[uid]['welcome_sent'] = True
+                users[uid]['welcome_sent_at'] = now.isoformat()
+                users[uid]['temperature'] = 'warm'
+                log_event(uid, "welcome_sent")
+                print(f"👋 Приветствие отправлено пользователю {uid}")
+                changed = True
 
     if changed:
         save_users_memory(users)
@@ -853,14 +851,16 @@ def main():
                         send_vk_message(vk_session, user_id=from_id, message=ai_response)
                         log_event(from_id, "ai_reply_sent")
 
+                        # Правка: принудительный этап после отправки бесплатного урока
                         if LINKS["link_free_lesson"] in ai_response:
                             update_user_memory(from_id, {
                                 "probe_lesson_sent": True,
                                 "probe_lesson_sent_at": datetime.now().isoformat(),
-                                "probe_followup_stage": 1
+                                "probe_followup_stage": 1,
+                                "stage": "дожим_после_урока"
                             })
                             log_event(from_id, "free_lesson_sent")
-                            print(f"🎁 Бесплатный урок отправлен пользователю {from_id}")
+                            print(f"🎁 Бесплатный урок отправлен пользователю {from_id}, этап -> дожим_после_урока")
 
                     else:
                         direct = is_direct_mention(text)
