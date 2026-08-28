@@ -1,2 +1,0 @@
-# ariha_agent
-Ариша
